@@ -1,0 +1,61 @@
+plugins {
+    id 'java'
+}
+
+group = 'io.gofannon'
+version = '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+configurations {
+    blackboxTestImplementation.extendsFrom implementation
+    blackboxTestRuntimeOnly.extendsFrom runtimeOnly
+}
+
+sourceSets {
+    blackboxTest {
+        compileClasspath += sourceSets.main.output
+        runtimeClasspath += sourceSets.main.output
+        java {
+            srcDirs = ['src/blackbox/java']
+        }
+    }
+}
+
+
+
+dependencies {
+    testImplementation platform('org.junit:junit-bom:5.9.3')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+    //blackboxTestImplementation 'org.junit.jupiter:junit-jupiter'
+
+    blackboxTestImplementation platform('org.junit:junit-bom:5.9.3')
+    blackboxTestImplementation  'org.junit.jupiter:junit-jupiter'
+}
+
+test {
+    useJUnitPlatform()
+}
+
+
+
+
+tasks.register('blackboxTest', Test) {
+    description = 'Runs blackbox tests.'
+    group = 'verification'
+
+    testClassesDirs = sourceSets.blackboxTest.output.classesDirs
+    classpath = sourceSets.blackboxTest.runtimeClasspath
+    shouldRunAfter test
+
+    useJUnitPlatform()
+
+    testLogging {
+        events "passed"
+    }
+}
+
+check.dependsOn blackboxTest
+
